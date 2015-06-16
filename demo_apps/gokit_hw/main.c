@@ -33,81 +33,72 @@
 ///////////////////////////////////////////////////////////////////////////////
 // SDK Included Files
 #include "board.h"
-#include "fsl_lptmr_driver.h"
+#include "fsl_pit_driver.h"
+#include "fsl_uart_driver.h"
 #include "fsl_debug_console.h"
+#include "fsl_port_hal.h"
 #include "gokit_hal/hal_key.h"
 #include "gokit_hal/hal_rgb_led.h"
 #include "gokit_hal/hal_motor.h"
+#include "gokit_hal/hal_uart.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
 ////////////////////////////////////////////////////////////////////////////////
-#define TMR_PERIOD    2000U	//LPTMR delay time in us
-
+#define PIT_PERIOD    2000U	//LPTMR delay time in us
+#define PIT_INSTANCE   0U
 ////////////////////////////////////////////////////////////////////////////////
 // Code
 ////////////////////////////////////////////////////////////////////////////////
-/*!
- * @brief LPTMR interrupt call back function.
- * The function is used to toggle LED1.
- */
-extern void lptmr_call_back(void);
-/*!
- * @brief Main function
- */
-inline void LPTMR_Init()
+//#define GOKIT_UART_BAUD  9600U
+//#define GOKIT_UART_INSTANCE 3U
+
+//const uint8_t buffStart[]   = "\n\r++++++++++++++++ UART Send/Receive Blocking Example Start +++++++++++++++++\n\r";
+//const uint8_t bufferData1[] = "\n\rType characters from keyboard, the board will receive and then echo them to terminal screen\n\r";
+
+void PIT0_CH0_Init()
 {
 	    // LPTMR configurations
-    lptmr_user_config_t lptmrConfig =
-    {
-        .timerMode = kLptmrTimerModeTimeCounter,
-        .freeRunningEnable = false,
-        .prescalerEnable = true,
-        .prescalerClockSource = kClockLptmrSrcLpoClk,
-        .prescalerValue = kLptmrPrescalerDivide2,
+    pit_user_config_t chn0Confg = {
         .isInterruptEnabled = true,
+        .periodUs = PIT_PERIOD
     };
-    // LPTMR driver state information
-    lptmr_state_t lptmrState;
-		    // Initialize LPTMR
-    LPTMR_DRV_Init(LPTMR0_IDX, &lptmrState, &lptmrConfig);
-		int ret;
-    // Set timer period for TMR_PERIOD seconds
-    ret = LPTMR_DRV_SetTimerPeriodUs(LPTMR0_IDX, TMR_PERIOD);
-		PRINTF("LPTMR ret=%d \n",ret);
-    // Install interrupt call back function for LPTMR
-    LPTMR_DRV_InstallCallback(LPTMR0_IDX, lptmr_call_back);
-    // Start LPTMR
-    LPTMR_DRV_Start(LPTMR0_IDX);
+  // Init pit module and enable run in debug
+    PIT_DRV_Init(0, false);
+
+    // Initialize PIT timer instance for channel 0 and 1
+    PIT_DRV_InitChannel(PIT_INSTANCE, 0, &chn0Confg);
+    PIT_DRV_StartTimer(PIT_INSTANCE, 0);
 
 }
 void gokit_hal_init()
 {
-		KEY_GPIO_Init();
-		RGB_LED_Init();
-		Motor_Init();
+	PIT0_CH0_Init();	
+	KEY_GPIO_Init();
+	RGB_LED_Init();
+	Motor_Init();
+	UARTx_Init();
 }
 int main (void)
 {
     // RX buffers
     //! @param receiveBuff Buffer used to hold received data
-    uint8_t receiveBuff;
     // Initialize standard SDK demo application pins
     hardware_init();
-	
-		LPTMR_Init();		
+		//LED1_EN;
+			
 		gokit_hal_init();
     // Initialize LED1
-    LED1_EN;
-
+		
     // Print the initial banner
     PRINTF("\r\nHello World!\n\n\r");
 
+		UARTx_test();
     while(1)
     {
         // Main routine that simply echoes received characters forever
-
+	
         // First, get character
        // receiveBuff = GETCHAR();
 				KEY_Handle();		
@@ -115,3 +106,4 @@ int main (void)
        // PUTCHAR(receiveBuff);
     }
 }
+

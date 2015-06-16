@@ -1,24 +1,14 @@
 /**
   ******************************************************************************
   * @file    Hal_key.c
-  * @author  jason
-	* @Tel     18938045680
-	* @QQ      570526723 
-  * @version V2.0
-  * @date    12/05/2014
+  * @author  Chay
+	* @QQ      917581001 
+	* @email 	 guo8113@126.com
+  * @version V1.0
+  * @date    15/06/2015
   * @brief   1，专业嵌入式智能设备方案定制
-						 2，专业开发工具供应商：http://wenjieteam.taobao.com/
+						 2，承接Freescale,NXP,ST Cortex M项目，及TI DM816x 系列项目
   ******************************************************************************
-  * @copy
-  *
-  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
-  * TIME. AS A RESULT, jason SHALL NOT BE HELD LIABLE FOR ANY
-  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
-  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
-  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-  *
-  * <h2><center>&copy; COPYRIGHT 2014 jason</center></h2>
   */ 
 #include "hal_key.h"
 #include "hal_rgb_led.h"
@@ -60,15 +50,6 @@ void KEY_GPIO_Init(void)
 	GPIO_DRV_InputPinInit(&keyPin);
 }
 
-/*******************************************************************************
-* Function Name  : 1 ms timer instead of ST TIM3_Int_Init(u16 arr,u16 psc)
-* Description    : 
-* Input          : 
-* Output         : None
-* Return         : None
-* Attention		   : None
-*******************************************************************************/
-//this is removed to main
 /*******************************************************************************
 * Function Name  : Get_Key
 * Description    : Read the KEY state
@@ -208,7 +189,7 @@ void KEY_Handle(void)
 		{
 			PRINTF("KEY2 PRESS\r\n");
 //			LED_RGB_Control(0,10,0);
-			Motor_status(10);
+			Motor_status(1);
 		}
 		if(Key_return & PRESS_KEY3)
 		{
@@ -217,7 +198,7 @@ void KEY_Handle(void)
 //			DHT11_Read_Data(&Device_ReadStruct.Temperature, &Device_ReadStruct.Humidity);
 //			printf("Temperature =%d;Humidity = %d " ,Device_ReadStruct.Temperature,Device_ReadStruct.Humidity);
 			LED_RGB_Control(0,0,0);
-  		Motor_status(5);
+  		Motor_status(6);
 			
 		}					
 	}
