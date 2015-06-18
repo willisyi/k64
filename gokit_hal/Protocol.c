@@ -22,6 +22,7 @@
   */ 
 	
 #include "protocol.h"
+#include "hal_uart.h"
 #if 0		//now not ported
 extern UART_HandleTypeDef  				UART_HandleStruct;
 

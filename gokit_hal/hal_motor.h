@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include "fsl_gpio_driver.h"
 #include "fsl_port_hal.h"

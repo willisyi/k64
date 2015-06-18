@@ -98,7 +98,7 @@ uint8_t ReadKeyValue(void)
 	uint8_t Key_press;
 	uint8_t Key_return = 0;
 	
-	if(KeyCountTime >= 5)  //KeyCountTime 1MS+1  按键消抖10MS
+	if(KeyCountTime >= 10)  //KeyCountTime 1MS+1  按键消抖10MS
 	{
 		KeyCountTime = 0;
 		Key_Check = 1;
@@ -141,7 +141,7 @@ uint8_t ReadKeyValue(void)
 				if(Key_press == Key_Prev) 
 				{
 					Key_LongCheck++;
-					if(Key_LongCheck >= 50)    //长按2S
+					if(Key_LongCheck >= 100)    //长按2S
 					{			
 						Key_LongCheck = 0;
 						Key_State = 3;

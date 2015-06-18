@@ -41,12 +41,12 @@
 #include "gokit_hal/hal_rgb_led.h"
 #include "gokit_hal/hal_motor.h"
 #include "gokit_hal/hal_uart.h"
-
+#include "gokit_hal/protocol.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
 ////////////////////////////////////////////////////////////////////////////////
-#define PIT_PERIOD    2000U	//LPTMR delay time in us
+#define PIT_PERIOD    1000U	//PIT frequence time in us
 #define PIT_INSTANCE   0U
 ////////////////////////////////////////////////////////////////////////////////
 // Code
@@ -54,8 +54,6 @@
 //#define GOKIT_UART_BAUD  9600U
 //#define GOKIT_UART_INSTANCE 3U
 
-//const uint8_t buffStart[]   = "\n\r++++++++++++++++ UART Send/Receive Blocking Example Start +++++++++++++++++\n\r";
-//const uint8_t bufferData1[] = "\n\rType characters from keyboard, the board will receive and then echo them to terminal screen\n\r";
 
 void PIT0_CH0_Init()
 {
@@ -94,14 +92,14 @@ int main (void)
     // Print the initial banner
     PRINTF("\r\nHello World!\n\n\r");
 
-		UARTx_test();
+		//UARTx_test();
     while(1)
     {
         // Main routine that simply echoes received characters forever
 	
         // First, get character
        // receiveBuff = GETCHAR();
-				KEY_Handle();		
+			KEY_Handle();					
         // Now echo the received character
        // PUTCHAR(receiveBuff);
     }

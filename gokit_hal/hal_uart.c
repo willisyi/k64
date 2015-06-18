@@ -29,7 +29,7 @@
 const uint8_t buffStart[]   = "\n\r++++++++++++++++ UART Send/Receive Blocking Example Start +++++++++++++++++\n\r";
 const uint8_t bufferData1[] = "\n\rType characters from keyboard, the board will receive and then echo them to terminal screen\n\r";
 
-
+void uart3callback(uint32_t instance, void* uartState);
 static uart_state_t uartState;
 void UARTx_Init(void)
 {
@@ -69,4 +69,14 @@ void UARTx_test(void)
             UART_DRV_SendDataBlocking(GOKIT_UART_INSTANCE, &rxChar, 1u, 1000u);
         }
     }
+}
+void UART2_Send_DATA(uint8_t data)
+{
+	UART_DRV_SendDataBlocking(GOKIT_UART_INSTANCE, &data, 1, 1000u);
+}
+void UART1_Send_DATA(uint8_t data)
+{
+	//not used
+	//UART_DRV_SendDataBlocking(GOKIT_UART_INSTANCE, &data, 1, 1000u);
+	;
 }
