@@ -22,15 +22,28 @@
   */ 
 
 /* Includes ------------------------------------------------------------------*/
-
+#include <stdio.h>
+#include <string.h>
 #include "hal_uart.h"
 #include "fsl_port_hal.h"
+#include "protocol.h"
+
 //for usart test
 const uint8_t buffStart[]   = "\n\r++++++++++++++++ UART Send/Receive Blocking Example Start +++++++++++++++++\n\r";
 const uint8_t bufferData1[] = "\n\rType characters from keyboard, the board will receive and then echo them to terminal screen\n\r";
+UART_HandleTypeDef  		UART_HandleStruct;
 
-void uart3callback(uint32_t instance, void* uartState);
 static uart_state_t uartState;
+int cnt=0;
+uint8_t Buff[256];
+void UART2_Send_DATA(uint8_t data);
+void uart_rx_callback(uint32_t instance, void * uartState)
+{
+	uart_state_t *state = (uart_state_t*)uartState;
+	//call datapack.
+	Buff[cnt] = *(state->rxBuff);
+	cnt++;
+}
 void UARTx_Init(void)
 {
 		PORT_HAL_SetMuxMode(PORTC,16,kPortMuxAlt3);
@@ -45,6 +58,8 @@ void UARTx_Init(void)
 	  //Notice !!!! First init LPTMR used by UART
 		OSA_Init();
 		UART_DRV_Init(GOKIT_UART_INSTANCE, &uartState, &uartConfig);
+		/*Then you can register callback func.*/
+		
 		//UART_DRV_SendDataBlocking(UART_INSTANCE, buffStart, byteCountBuff, timeout);
 }
 void UARTx_test(void)
@@ -58,16 +73,22 @@ void UARTx_test(void)
     // Inform user of what to do
     byteCountBuff = sizeof(bufferData1);
     UART_DRV_SendDataBlocking(GOKIT_UART_INSTANCE, bufferData1, byteCountBuff, 1000u);
+			
+		UART_DRV_InstallRxCallback(GOKIT_UART_INSTANCE,
+                                              uart_rx_callback,
+                                              &rxChar,
+                                              &uartState,
+                                              true);
 
-    // Send/receive blocking function
     while(true)
     {
-        // Wait to receive input data
-        if (kStatus_UART_Success == UART_DRV_ReceiveDataBlocking(GOKIT_UART_INSTANCE, &rxChar, 1u, OSA_WAIT_FOREVER))
-        {
-            // Echo received character
-            UART_DRV_SendDataBlocking(GOKIT_UART_INSTANCE, &rxChar, 1u, 1000u);
-        }
+
+			if(cnt>=1)
+			{
+        //UART_DRV_SendDataBlocking(GOKIT_UART_INSTANCE, Buff, 10, 1000u); 
+				UART2_Send_DATA(*Buff);
+				cnt = 0;
+			}
     }
 }
 void UART2_Send_DATA(uint8_t data)
@@ -80,3 +101,4 @@ void UART1_Send_DATA(uint8_t data)
 	//UART_DRV_SendDataBlocking(GOKIT_UART_INSTANCE, &data, 1, 1000u);
 	;
 }
+/*EOF*/

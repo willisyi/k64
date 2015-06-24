@@ -20,26 +20,54 @@
   *
   * <h2><center>&copy; COPYRIGHT 2014 jason</center></h2>
   */ 
-#include "include.h"
+#include "hal_temp_hum.h"
+#include "delay.h"
 
+																		
+#define	DHT11_DQ_OUT(n)  GPIO_DRV_WritePinOutput(kGokitDHT,n)
+#define	DHT11_DQ_IN   	 GPIO_DRV_ReadPinInput(kGokitDHT)
+
+//Set GPIO Direction
+static void DHT11_IO_OUT()
+{
+		gpio_output_pin_user_config_t dthoutPin={   
+													.pinName = kGokitDHT,											
+													.config.outputLogic = 0,									
+													.config.slewRate = kPortSlowSlewRate,			
+													.config.isOpenDrainEnabled = false,				
+													.config.driveStrength = kPortLowDriveStrength 
+											}; 																						
+	GPIO_DRV_OutputPinInit(&dthoutPin);	
+}
+static void DHT11_IO_IN()
+{
+			gpio_input_pin_user_config_t dthinPin={   
+						.pinName = kGokitDHT,							     
+						.config.isPullEnable = true,				    
+						.config.pullSelect = kPortPullUp,		    	
+						.config.isPassiveFilterEnabled = false, 
+					  .config.interrupt = kPortIntDisabled    
+			}; 																					
+		GPIO_DRV_InputPinInit(&dthinPin);					
+}
 //Reset DHT11
 void DHT11_Rst(void)	   
 {                 
-	DHT11_IO_OUT(); 											//SET OUTPUT
-  DHT11_DQ_OUT=0; 											//GPIOA.0=0
-  Delay_ms(20);    											//Pull down Least 18ms
-  DHT11_DQ_OUT=1; 											//GPIOA.0=1 
+	DHT11_IO_OUT();										//SET OUTPUT
+  DHT11_DQ_OUT(0);											//GPIOA.0=0
+	Delay_ms(20);  //20  											//Pull down Least 18ms
+  DHT11_DQ_OUT(1); 											//GPIOA.0=1 
 	Delay_us(30);     										//Pull up 20~40us
 }
 
-u8 DHT11_Check(void) 	   
+uint8_t DHT11_Check(void) 	   
 {   
-	u8 retry=0;
+	uint8_t retry=0;
 	DHT11_IO_IN();												//SET INPUT	 
   while (DHT11_DQ_IN&&retry<100)				//DHT11 Pull down 40~80us
 	{
 		retry++;
-		Delay_us(1);
+		Delay_us(1);					//Delay_us(1);
 	}	 
 	
 	if(retry>=100)
@@ -50,7 +78,7 @@ u8 DHT11_Check(void)
   while (!DHT11_DQ_IN&&retry<100)				//DHT11 Pull up 40~80us
 	{
 		retry++;
-		Delay_us(1);
+		Delay_us(1);//Delay_us(1);
 	}
 	
 	if(retry>=100)
@@ -59,20 +87,20 @@ u8 DHT11_Check(void)
 	return 0;
 }
 
-u8 DHT11_Read_Bit(void) 			 
+uint8_t DHT11_Read_Bit(void) 			 
 {
- 	u8 retry=0;
+ 	uint8_t retry=0;
 	while(DHT11_DQ_IN&&retry<100)					//wait become Low level
 	{
 		retry++;
-		Delay_us(1);
+		Delay_us(1); //us
 	}
 	
 	retry=0;
 	while(!DHT11_DQ_IN&&retry<100)				//wait become High level
 	{
 		retry++;
-		Delay_us(1);
+		Delay_us(1);//us
 	}
 	
 	Delay_us(40);//wait 40us
@@ -83,9 +111,9 @@ u8 DHT11_Read_Bit(void)
 		return 0;		   
 }
 
-u8 DHT11_Read_Byte(void)    
+uint8_t DHT11_Read_Byte(void)    
 {        
-  u8 i,dat;
+  uint8_t i,dat;
   dat=0;
 	for (i=0;i<8;i++) 
 	{
@@ -96,10 +124,10 @@ u8 DHT11_Read_Byte(void)
 	return dat;
 }
 
-u8 DHT11_Read_Data(u8 *temperature,u8 *humidity)    
+uint8_t DHT11_Read_Data(uint8_t *temperature,uint8_t *humidity)    
 {        
- 	u8 buf[5];
-	u8 i;
+ 	uint8_t buf[5];
+	uint8_t i;
 	DHT11_Rst();
 	if(DHT11_Check()==0)
 	{
@@ -119,19 +147,8 @@ u8 DHT11_Read_Data(u8 *temperature,u8 *humidity)
 	return 0;	    
 }
 	 
-u8 DHT11_Init(void)
-{	 
- 	GPIO_InitTypeDef  GPIO_InitStructure;
- 	
- 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);	 
-	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable,ENABLE);
-	
- 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;				 
- 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 
- 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
- 	GPIO_Init(GPIOB, &GPIO_InitStructure);				 
- 	GPIO_SetBits(GPIOB,GPIO_Pin_3);		 
-			    
+uint8_t DHT11_Init(void)
+{	 		
 	DHT11_Rst();  
 	return DHT11_Check();
 } 
