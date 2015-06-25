@@ -7,7 +7,7 @@
 
 void Delay_Init(uint8_t SYSCLK);
 void Delay_ms(uint16_t nms);
-void Delay_us(uint32_t nus);
+int Delay_us(uint32_t nus);
 
 
 #endif

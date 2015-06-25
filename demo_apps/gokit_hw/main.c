@@ -86,17 +86,17 @@ int main (void)
     //! @param receiveBuff Buffer used to hold received data
     // Initialize standard SDK demo application pins
     hardware_init();
-		LED1_EN;
+		//LED1_EN;
 		
 		gokit_hal_init();
     // Initialize LED1
 		
     // Print the initial banner
-	PRINTF("\r\nHello World!clock:%d\n\n\r",SystemCoreClock);
+	  PRINTF("\r\nHello World!clock:%d\n\n\r",SystemCoreClock);
 
-	int i=0;
-		//UARTx_test();
-	int j=0;
+	
+		UARTx_test();//while(1) ,test uart3
+		int i=0,j=0;
     while(1)
     {
 			
@@ -105,14 +105,15 @@ int main (void)
 			DHT11_Read_Data(&temp,&hum);
 		PRINTF("Temp and hum %d %d\r\n",temp,hum);
 			for(j=0;j<5;j++)
-			Delay_ms(200);	
+						Delay_us(100000);
+			//Delay_ms(200);	
 //			for(j=0;j<10;j++)
-//			Delay_us(50000);
-			PRINTF("\r\n1000ms....%d\r\n",++i);
+
+			PRINTF("\r\n500ms....%d\r\n",++i);
 	//		PRINTF("\r\n500ms....\r\n");
         // First, get character
        // receiveBuff = GETCHAR();
-//			KEY_Handle();					
+			KEY_Handle();					
         // Now echo the received character
        // PUTCHAR(receiveBuff);
     }

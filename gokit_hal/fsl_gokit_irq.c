@@ -98,64 +98,6 @@ void PIT1_IRQHandler(void)
 #endif /* FSL_FEATURE_PIT_HAS_SHARED_IRQ_HANDLER */
 
 
-extern void * g_uartStatePtr[UART_INSTANCE_COUNT];
-//#define GOKIT
-#ifdef GOKIT
-extern UART_HandleTypeDef  							UART_HandleStruct;
-/* Pointer to uart runtime state structure */
-void GOKIT_UART_PackData(const uint8_t vlue)
-{
-	if(UART_HandleStruct.Package_Flag ==0)
-		{
-			
-			if(UART_HandleStruct.UART_Flag1 ==0)
-			{
-				if(vlue == 0xff)
-				{   
-						UART_HandleStruct.UART_Count = 0;						
-						UART_HandleStruct.UART_Buf[UART_HandleStruct.UART_Count]=vlue;
-						UART_HandleStruct.UART_Count++;	
-						UART_HandleStruct.UART_Flag1 = 1;
-				}			
-				return ;
-			}
-			else if(UART_HandleStruct.UART_Flag2 ==0)
-			{
-					UART_HandleStruct.UART_Buf[UART_HandleStruct.UART_Count]=vlue;
-					UART_HandleStruct.UART_Count++;
-					if(UART_HandleStruct.UART_Buf[1] == 0xff)
-					{
-						UART_HandleStruct.UART_Flag2 = 1;	
-						
-					}					
-					else
-					{
-						UART_HandleStruct.UART_Flag1 = 0;
-					}
-					return ;
-			}
-			else
-			{
-				UART_HandleStruct.UART_Buf[UART_HandleStruct.UART_Count] = vlue;
-				if(UART_HandleStruct.UART_Count >=4 && UART_HandleStruct.UART_Buf[UART_HandleStruct.UART_Count] == 0x55 && UART_HandleStruct.UART_Buf[UART_HandleStruct.UART_Count - 1] == 0xFF)
-				{}
-				else 
-				UART_HandleStruct.UART_Count++;
-				if(UART_HandleStruct.UART_Count == 0x04)
-				{
-					UART_HandleStruct.UART_Cmd_len = UART_HandleStruct.UART_Buf[2]*256+  UART_HandleStruct.UART_Buf[3]; 	
-
-				}
-				if(UART_HandleStruct.UART_Count ==  (UART_HandleStruct.UART_Cmd_len + 4))
-				{
-					UART_HandleStruct.Package_Flag = 1;
-					UART_HandleStruct.UART_Flag1 = 0;
-					UART_HandleStruct.UART_Flag2 = 0;
-				}	
-			}
-		}/*if(UART_HandleStruct.UART_Flag1 ==0)*/
-}/*function end*/
-#endif
 extern void UART_DRV_IRQHandler(uint32_t instance);
 /*customed ISR to deal with package generate */
 void UART3_RX_TX_IRQHandler(void)

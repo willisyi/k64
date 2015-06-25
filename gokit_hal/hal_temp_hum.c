@@ -50,12 +50,11 @@ static void DHT11_IO_IN()
 			}; 																					
 		GPIO_DRV_InputPinInit(&dthinPin);					
 }
-//Reset DHT11
 void DHT11_Rst(void)	   
 {                 
-	DHT11_IO_OUT();										//SET OUTPUT
-  DHT11_DQ_OUT(0);											//GPIOA.0=0
-	Delay_ms(20);  //20  											//Pull down Least 18ms
+	DHT11_IO_OUT(); 											//SET OUTPUT
+  DHT11_DQ_OUT(0); 											//GPIOA.0=0
+  Delay_ms(20);    											//Pull down Least 18ms
   DHT11_DQ_OUT(1); 											//GPIOA.0=1 
 	Delay_us(30);     										//Pull up 20~40us
 }
@@ -67,7 +66,7 @@ uint8_t DHT11_Check(void)
   while (DHT11_DQ_IN&&retry<100)				//DHT11 Pull down 40~80us
 	{
 		retry++;
-		Delay_us(1);					//Delay_us(1);
+		Delay_us(1);
 	}	 
 	
 	if(retry>=100)
@@ -78,7 +77,7 @@ uint8_t DHT11_Check(void)
   while (!DHT11_DQ_IN&&retry<100)				//DHT11 Pull up 40~80us
 	{
 		retry++;
-		Delay_us(1);//Delay_us(1);
+		Delay_us(1);
 	}
 	
 	if(retry>=100)
@@ -93,14 +92,14 @@ uint8_t DHT11_Read_Bit(void)
 	while(DHT11_DQ_IN&&retry<100)					//wait become Low level
 	{
 		retry++;
-		Delay_us(1); //us
+		Delay_us(1);
 	}
 	
 	retry=0;
 	while(!DHT11_DQ_IN&&retry<100)				//wait become High level
 	{
 		retry++;
-		Delay_us(1);//us
+		Delay_us(1);
 	}
 	
 	Delay_us(40);//wait 40us
@@ -148,7 +147,11 @@ uint8_t DHT11_Read_Data(uint8_t *temperature,uint8_t *humidity)
 }
 	 
 uint8_t DHT11_Init(void)
-{	 		
+{	 			 
+ 	DHT11_IO_OUT();
+	DHT11_DQ_OUT(1);		//must be 1,then change to 0 to RST.
+			    
 	DHT11_Rst();  
 	return DHT11_Check();
 } 
+/*EOF*/

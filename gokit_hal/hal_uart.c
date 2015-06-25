@@ -27,6 +27,7 @@
 #include "hal_uart.h"
 #include "fsl_port_hal.h"
 #include "protocol.h"
+#include "fsl_debug_console.h"
 
 //for usart test
 const uint8_t buffStart[]   = "\n\r++++++++++++++++ UART Send/Receive Blocking Example Start +++++++++++++++++\n\r";
@@ -35,14 +36,69 @@ UART_HandleTypeDef  		UART_HandleStruct;
 
 static uart_state_t uartState;
 int cnt=0;
-uint8_t Buff[256];
+//uint8_t Buff[256];
 void UART2_Send_DATA(uint8_t data);
+
+/* Pointer to uart runtime state structure */
+static void GOKIT_UART_PackData(const uint8_t vlue)
+{
+	if(UART_HandleStruct.Package_Flag ==0)
+		{
+			
+			if(UART_HandleStruct.UART_Flag1 ==0)
+			{
+				if(vlue == 0xff)
+				{   
+						UART_HandleStruct.UART_Count = 0;						
+						UART_HandleStruct.UART_Buf[UART_HandleStruct.UART_Count]=vlue;
+						UART_HandleStruct.UART_Count++;	
+						UART_HandleStruct.UART_Flag1 = 1;
+				}			
+				return ;
+			}
+			else if(UART_HandleStruct.UART_Flag2 ==0)
+			{
+					UART_HandleStruct.UART_Buf[UART_HandleStruct.UART_Count]=vlue;
+					UART_HandleStruct.UART_Count++;
+					if(UART_HandleStruct.UART_Buf[1] == 0xff)
+					{
+						UART_HandleStruct.UART_Flag2 = 1;	
+						
+					}					
+					else
+					{
+						UART_HandleStruct.UART_Flag1 = 0;
+					}
+					return ;
+			}
+			else
+			{
+				UART_HandleStruct.UART_Buf[UART_HandleStruct.UART_Count] = vlue;
+				if(UART_HandleStruct.UART_Count >=4 && UART_HandleStruct.UART_Buf[UART_HandleStruct.UART_Count] == 0x55 && UART_HandleStruct.UART_Buf[UART_HandleStruct.UART_Count - 1] == 0xFF)
+				{}
+				else 
+				UART_HandleStruct.UART_Count++;
+				if(UART_HandleStruct.UART_Count == 0x04)
+				{
+					UART_HandleStruct.UART_Cmd_len = UART_HandleStruct.UART_Buf[2]*256+  UART_HandleStruct.UART_Buf[3]; 	
+
+				}
+				if(UART_HandleStruct.UART_Count ==  (UART_HandleStruct.UART_Cmd_len + 4))
+				{
+					UART_HandleStruct.Package_Flag = 1;
+					UART_HandleStruct.UART_Flag1 = 0;
+					UART_HandleStruct.UART_Flag2 = 0;
+				}	
+			}
+		}/*if(UART_HandleStruct.UART_Flag1 ==0)*/
+}/*function end*/
+
 void uart_rx_callback(uint32_t instance, void * uartState)
 {
 	uart_state_t *state = (uart_state_t*)uartState;
 	//call datapack.
-	Buff[cnt] = *(state->rxBuff);
-	cnt++;
+	//Buff[cnt] = *(state->rxBuff);
+	GOKIT_UART_PackData(*(state->rxBuff));
 }
 void UARTx_Init(void)
 {
@@ -82,13 +138,15 @@ void UARTx_test(void)
 
     while(true)
     {
-
-			if(cnt>=1)
-			{
+			
+			if(UART_HandleStruct.Package_Flag ==1)
         //UART_DRV_SendDataBlocking(GOKIT_UART_INSTANCE, Buff, 10, 1000u); 
-				UART2_Send_DATA(*Buff);
-				cnt = 0;
+			{
+				UART_HandleStruct.Package_Flag = 0;
+					PRINTF("%d \r\n",UART_HandleStruct.Message_Len);
+				PRINTF("%d \r\n",UART_HandleStruct.UART_Cmd_len);
 			}
+			
     }
 }
 void UART2_Send_DATA(uint8_t data)
