@@ -20,10 +20,14 @@
   *
   * <h2><center>&copy; COPYRIGHT 2014 jason</center></h2>
   */ 
-	
+#include <string.h>
+#include <stdio.h>
+#include "fsl_debug_console.h"
 #include "protocol.h"
 #include "hal_uart.h"
-#if 0		//now not ported
+#include "hal_motor.h"
+#include "hal_rgb_led.h"
+
 extern UART_HandleTypeDef  				UART_HandleStruct;
 
 
@@ -82,7 +86,7 @@ void MessageHandle(void)
 				break;
 			case Pro_W2D_Heartbeat_Cmd:							
 				Pro_W2D_CommonCmdHandle();
-				printf("Pro_W2D_Heartbeat ...\r\n");	
+				PRINTF("Pro_W2D_Heartbeat ...\r\n");	
 				break;						
 			case Pro_W2D_ReportWifiStatus_Cmd:
 				Pro_D2W_ReportDevStatusHandle();
@@ -117,12 +121,12 @@ void Pro_W2D_GetMcuInfo(void)
 	
 	
  /******************************输出日志*********************************************/	
-	printf("W2D_GetMcuInfo...\r\n");
-	printf("PRO_VER:"); 		printf(PRO_VER); 			printf("\r\n");
-	printf("P0_VER:");			printf(P0_VER);				printf("\r\n");
-	printf("P0_VER:");      printf(HARD_VER);			printf("\r\n");
-	printf("SOFT_VER:");    printf(SOFT_VER);			printf("\r\n");
-	printf("PRODUCT_KEY:"); printf(PRODUCT_KEY);  printf("\r\n");
+	PRINTF("W2D_GetMcuInfo...\r\n");
+	PRINTF("PRO_VER:"); 		PRINTF(PRO_VER); 			PRINTF("\r\n");
+	PRINTF("P0_VER:");			PRINTF(P0_VER);				PRINTF("\r\n");
+	PRINTF("P0_VER:");      PRINTF(HARD_VER);			PRINTF("\r\n");
+	PRINTF("SOFT_VER:");    PRINTF(SOFT_VER);			PRINTF("\r\n");
+	PRINTF("PRODUCT_KEY:"); PRINTF(PRODUCT_KEY);  PRINTF("\r\n");
 /***********************************************************************************/	   
 	
 	
@@ -171,22 +175,22 @@ void Pro_W2D_WifiStatusHandle(void)
 	switch (Pro_W2D_WifiStatusStruct.Wifi_Status)
 	{
 		case Wifi_SoftAPMode:
-			printf("W2M->Wifi_SoftAPMode\r\n");
+			PRINTF("W2M->Wifi_SoftAPMode\r\n");
 			break;
 		case Wifi_StationMode:
-			printf("W2M->Wifi_StationMode\r\n");
+			PRINTF("W2M->Wifi_StationMode\r\n");
 			break;
 		case Wifi_ConfigMode:
-			printf("W2M->Wifi_ConfigMode\r\n");
+			PRINTF("W2M->Wifi_ConfigMode\r\n");
 			break;
 		case Wifi_BindingMode:
-			printf("W2M->Wifi_BindingMode\r\n");
+			PRINTF("W2M->Wifi_BindingMode\r\n");
 			break;
 		case Wifi_ConnRouter:
-			printf("W2M->Wifi_ConnRouter\r\n");
+			PRINTF("W2M->Wifi_ConnRouter\r\n");
 			break;
 		case Wifi_ConnClouds:
-			printf("W2M->Wifi_ConnClouds\r\n");
+			PRINTF("W2M->Wifi_ConnClouds\r\n");
 			break;
 		default:
 			break;
@@ -205,7 +209,7 @@ void Pro_W2D_WifiStatusHandle(void)
 void Pr0_W2D_RequestResetDeviceHandle(void)
 {
 	Pro_W2D_CommonCmdHandle();
-	printf("W2D_RequestResetDevice...\r\n");
+	PRINTF("W2D_RequestResetDevice...\r\n");
 	
 /****************************在这里添加设备复位函数****************************/	
 	__set_FAULTMASK(1); // 关闭所有中断
@@ -236,13 +240,13 @@ void Pro_W2D_ErrorCmdHandle(void)
 	switch (Pro_ErrorCmdStruct.Error_Packets)
 	{
 		case Error_AckSum:
-			printf("W2D Error Command ->Error_AckSum\r\n");
+			PRINTF("W2D Error Command ->Error_AckSum\r\n");
 			break;
 		case Error_Cmd:
-			printf("W2D Error Command ->Error_Cmd\r\n");
+			PRINTF("W2D Error Command ->Error_Cmd\r\n");
 			break;
 		case Error_Other:
-			printf("W2D Error Command ->Error_Other\r\n");
+			PRINTF("W2D Error Command ->Error_Other\r\n");
 			break;
 		default:
 			break;
@@ -304,12 +308,12 @@ void Pro_W2D_Control_DevceHandle(void)
 			if(Pro_P0_ControlStruct.Device_Wirte.LED_Cmd == LED_OnOff)
 			{
 				LED_RGB_Control(0,0,0);
-				printf("SetLED_Off \r\n");
+				PRINTF("SetLED_Off \r\n");
 			}
 			if(Pro_P0_ControlStruct.Device_Wirte.LED_Cmd == LED_OnOn)
 			{
 				LED_RGB_Control(254,0,0);
-				printf("SetLED_On \r\n");
+				PRINTF("SetLED_On \r\n");
 			}
 			break;			
 			case SetLED_Color:	
@@ -317,53 +321,53 @@ void Pro_W2D_Control_DevceHandle(void)
 				if(Pro_P0_ControlStruct.Device_Wirte.LED_Cmd == LED_Costom)
 				{
 					Set_LedStatus = 0;
-					printf("SetLED LED_Costom \r\n");
+					PRINTF("SetLED LED_Costom \r\n");
 				}
 				if(Pro_P0_ControlStruct.Device_Wirte.LED_Cmd == LED_Yellow)
 				{
 					Set_LedStatus = 1;
 					LED_RGB_Control(254, 0, 70);
-					printf("SetLED LED_Yellow \r\n");
+					PRINTF("SetLED LED_Yellow \r\n");
 				}
 					
 				if(Pro_P0_ControlStruct.Device_Wirte.LED_Cmd == LED_Purple)
 				{
 					Set_LedStatus = 1;
 					LED_RGB_Control(254, 70, 0);	
-					printf("SetLED LED_Purple \r\n");
+					PRINTF("SetLED LED_Purple \r\n");
 				}
 				if(Pro_P0_ControlStruct.Device_Wirte.LED_Cmd == LED_Pink)
 				{
 					Set_LedStatus = 1;
 					LED_RGB_Control(238, 30, 30);
-					printf("SetLED LED_Pink \r\n");
+					PRINTF("SetLED LED_Pink \r\n");
 				}
 			break;
 		case SetLED_R:
 			if(Set_LedStatus == 1) break;
 			Device_WirteStruct.LED_R = Pro_P0_ControlStruct.Device_Wirte.LED_R;
-			printf("W2D Control LED_R = %d \r\n",Device_WirteStruct.LED_R);
+			PRINTF("W2D Control LED_R = %d \r\n",Device_WirteStruct.LED_R);
 			LED_RGB_Control(Device_WirteStruct.LED_R,Device_WirteStruct.LED_B,Device_WirteStruct.LED_G);
 		  
 			break;
 		case SetLED_G:
 			if(Set_LedStatus == 1) break;
 			Device_WirteStruct.LED_G = Pro_P0_ControlStruct.Device_Wirte.LED_G;
-			printf("W2D Control LED_G = %d \r\n",Device_WirteStruct.LED_G);
+			PRINTF("W2D Control LED_G = %d \r\n",Device_WirteStruct.LED_G);
 			LED_RGB_Control(Device_WirteStruct.LED_R,Device_WirteStruct.LED_B,Device_WirteStruct.LED_G);
 			
 			break;
 		case SetLED_B:
 			if(Set_LedStatus == 1) break;
 			Device_WirteStruct.LED_B = Pro_P0_ControlStruct.Device_Wirte.LED_B;
-			printf("W2D Control LED_B = %d \r\n",Device_WirteStruct.LED_B);
+			PRINTF("W2D Control LED_B = %d \r\n",Device_WirteStruct.LED_B);
 			LED_RGB_Control(Device_WirteStruct.LED_R,Device_WirteStruct.LED_B,Device_WirteStruct.LED_G);
 			
 			break;
 		case SetMotor:
 			Device_WirteStruct.Motor = Pro_P0_ControlStruct.Device_Wirte.Motor;
 
-			printf("W2D Control Motor = %d \r\n",exchangeBytes(Device_WirteStruct.Motor));
+			PRINTF("W2D Control Motor = %d \r\n",exchangeBytes(Device_WirteStruct.Motor));
 			Motor_status(exchangeBytes(Device_WirteStruct.Motor));
 			break;
 		
@@ -403,7 +407,7 @@ void Pro_D2W_ReportDevStatusHandle(void)
 	Pro_D2W_ReportStatusStruct.Sum = CheckSum((uint8_t *)&Pro_D2W_ReportStatusStruct, sizeof(Pro_D2W_ReportStatusStruct));	
 	Pro_UART_SendBuf((uint8_t *)&Pro_D2W_ReportStatusStruct,sizeof(Pro_D2W_ReportStatusStruct), 0);
 	
-	printf("Pro_D2W_ReportDevStatus\r\n");	
+	PRINTF("Pro_D2W_ReportDevStatus\r\n");	
 }
 
 
@@ -416,15 +420,14 @@ void Pro_D2W_ReportDevStatusHandle(void)
 * Return         : None
 * Attention		   : 若等待ACK，按照协议失败重发3次；数据区出现FF，在其后增加55
 *******************************************************************************/
-
-void Pro_UART_SendBuf(uint8_t *Buf, uint16_t PackLen, uint8_t Tag)
+void Pro_UART_SendBuf(uint8_t *Buf, uint16_t PackLen, uint8_t Tag)	
 {
 	uint16_t i;
 	Pro_HeadPartTypeDef   Send_HeadPart;
 	Pro_HeadPartTypeDef   Recv_HeadPart;
 	
 	for(i=0;i<PackLen;i++){
-		UART2_Send_DATA(Buf[i]);
+		UART2_Send_DATA(Buf[i]);//K64实际上使用uart3，这里为了与ST保持一致
 		if(i >=2 && Buf[i] == 0xFF) UART2_Send_DATA(0x55);		
 	}		
 	
@@ -528,7 +531,6 @@ uint8_t CheckSum( uint8_t *buf, int packLen )
 }
 
 
-#endif
 
 
 

@@ -45,8 +45,10 @@
 #include <assert.h>
 #include "fsl_pit_driver.h"
 #include "fsl_uart_driver.h"
-#include "fsl_uart_hal.h"
+#include "fsl_uart_driver.h"
+#include "fsl_gpio_driver.h"
 #include "protocol.h"
+#include "hal_infrared.h"
 /******************************************************************************
  * Code
  *****************************************************************************/
@@ -54,9 +56,13 @@
 /*             KEY1 :长按  RESET WIFI, KEY2 :短按  配置WiFi联                 */
 /*             定时器3中断服务程序                                            */
 /******************************************************************************/
-//extern Pro_Wait_AckTypeDef           	  Wait_AckStruct;
-//extern uint32_t                         SystemTimeCount ;
+extern Pro_Wait_AckTypeDef           	  Wait_AckStruct;
+extern uint32_t                         SystemTimeCount ;
 extern uint8_t 													KeyCountTime;
+extern UART_HandleTypeDef  							UART_HandleStruct;
+extern Device_ReadTypeDef               Device_ReadStruct;
+
+extern void UART_DRV_IRQHandler(uint32_t instance);
 //extern uint32_t ReportTimeCount;
 /*!
  * @brief System default IRQ handler defined in startup code.
@@ -71,7 +77,10 @@ void PIT_IRQHandler(void)
         {
             /* Clear interrupt flag.*/
             PIT_HAL_ClearIntFlag(g_pitBase[0], i);
-            KeyCountTime++;
+            SystemTimeCount++;
+						Wait_AckStruct.SendTime ++;
+						KeyCountTime++;
+						ReportTimeCount++;
         }
     }
 }
@@ -98,13 +107,30 @@ void PIT1_IRQHandler(void)
 #endif /* FSL_FEATURE_PIT_HAS_SHARED_IRQ_HANDLER */
 
 
-extern void UART_DRV_IRQHandler(uint32_t instance);
 /*customed ISR to deal with package generate */
 void UART3_RX_TX_IRQHandler(void)
 {
 		//uint32_t instance = 3;
     UART_DRV_IRQHandler(3);
 }
+
+
+void PORTB_IRQHandler()
+{
+	GPIO_DRV_ClearPinIntFlag(kInfPin);
+	
+	  if(GPIO_DRV_ReadPinInput(kInfPin))
+		{
+			Device_ReadStruct.Infrared = false;
+		}
+		else
+		{		
+			Device_ReadStruct.Infrared = true;
+		}	
+		Pro_D2W_ReportDevStatusHandle();
+}
+
+
 
 /*******************************************************************************
  * EOF

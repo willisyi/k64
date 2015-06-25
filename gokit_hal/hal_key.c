@@ -10,16 +10,18 @@
 						 2，承接Freescale,NXP,ST Cortex M项目，及TI DM816x 系列项目
   ******************************************************************************
   */ 
+#include "fsl_debug_console.h"	//for debug
 #include "hal_key.h"
 #include "hal_rgb_led.h"
 #include "hal_motor.h"
-#include "fsl_debug_console.h"	//for debug
+#include "hal_temp_hum.h"
+#include "protocol.h"
 
-//extern Pro_CommonCmdTypeDef         	 Pro_CommonCmdStruct;
-//extern Pro_CommonCmdTypeDef     		   Pro_M2WResetCmdStruct;    //MCU控制WIFI重置
-//extern Pro_D2W_ConfigWifiTypeDef       Pro_D2WConfigCmdStruct;   //MCU配置WiFi模块
-//extern Device_ReadTypeDef               Device_ReadStruct;
-//extern Device_WirteTypeDef   					  Device_WirteStruct;
+extern Pro_CommonCmdTypeDef         	 Pro_CommonCmdStruct;
+extern Pro_CommonCmdTypeDef     		   Pro_M2WResetCmdStruct;    //MCU控制WIFI重置
+extern Pro_D2W_ConfigWifiTypeDef       Pro_D2WConfigCmdStruct;   //MCU配置WiFi模块
+extern Device_ReadTypeDef               Device_ReadStruct;
+extern Device_WirteTypeDef   					  Device_WirteStruct;
 
 extern uint8_t									     	 SN; 
 uint8_t KeyCountTime;
@@ -181,24 +183,23 @@ void KEY_Handle(void)
 		if(Key_return & PRESS_KEY1)
 		{
 			PRINTF("KEY1 PRESS\r\n");
-//			LED_RGB_Control(0,0,10);
+			LED_RGB_Control(0,0,10);
 			Motor_status(0);
 			
 		}
 		if(Key_return & PRESS_KEY2)
 		{
 			PRINTF("KEY2 PRESS\r\n");
-//			LED_RGB_Control(0,10,0);
-			Motor_status(1);
+			LED_RGB_Control(0,10,0);
+			Motor_status(10);
 		}
 		if(Key_return & PRESS_KEY3)
 		{
 			PRINTF("KEY3 PRESS\r\n");
-//			LED_RGB_Control(10,0,00);
-//			DHT11_Read_Data(&Device_ReadStruct.Temperature, &Device_ReadStruct.Humidity);
-//			printf("Temperature =%d;Humidity = %d " ,Device_ReadStruct.Temperature,Device_ReadStruct.Humidity);
-			LED_RGB_Control(0,0,0);
-  		Motor_status(6);
+			LED_RGB_Control(10,0,0);
+			DHT11_Read_Data(&Device_ReadStruct.Temperature, &Device_ReadStruct.Humidity);
+			PRINTF("Temperature =%d;Humidity = %d " ,Device_ReadStruct.Temperature,Device_ReadStruct.Humidity);
+  		Motor_status(5);
 			
 		}					
 	}
@@ -238,30 +239,27 @@ void KEY_LongHandle(uint8_t KeyAction)
 {
 	if(KeyAction  == KEY1_Long_Action)
 	{
-//		Device_WirteStruct.LED_R = 50;
-//		Device_WirteStruct.LED_G = 0;
-//		Device_WirteStruct.LED_B = 0;
-//		LED_RGB_Control(Device_WirteStruct.LED_R,Device_WirteStruct.LED_G,Device_WirteStruct.LED_B);
-//		
-//		Pro_M2WResetCmdStruct.Pro_HeadPart.SN = SN++;
-//		Pro_M2WResetCmdStruct.Sum = CheckSum((uint8_t *)&Pro_M2WResetCmdStruct, sizeof(Pro_M2WResetCmdStruct));
-//		Pro_UART_SendBuf((uint8_t *)&Pro_M2WResetCmdStruct,sizeof(Pro_M2WResetCmdStruct), 0);	
-
-			LED_RGB_Control(100,10,20);
+		Device_WirteStruct.LED_R = 50;
+		Device_WirteStruct.LED_G = 0;
+		Device_WirteStruct.LED_B = 0;
+		LED_RGB_Control(Device_WirteStruct.LED_R,Device_WirteStruct.LED_G,Device_WirteStruct.LED_B);
+		
+		Pro_M2WResetCmdStruct.Pro_HeadPart.SN = SN++;
+		Pro_M2WResetCmdStruct.Sum = CheckSum((uint8_t *)&Pro_M2WResetCmdStruct, sizeof(Pro_M2WResetCmdStruct));
+		Pro_UART_SendBuf((uint8_t *)&Pro_M2WResetCmdStruct,sizeof(Pro_M2WResetCmdStruct), 0);	
 	}
 
 	if(KeyAction  == KEY2_Long_Action)
 	{
-//		Device_WirteStruct.LED_R = 0;
-//		Device_WirteStruct.LED_G = 0;
-//		Device_WirteStruct.LED_B = 50;
-//		LED_RGB_Control(Device_WirteStruct.LED_R,Device_WirteStruct.LED_G,Device_WirteStruct.LED_B);		
-//		
-//		Pro_D2WConfigCmdStruct.Pro_HeadPart.SN = SN++;
-//		Pro_D2WConfigCmdStruct.Config_Method = 0x02;
-//		Pro_D2WConfigCmdStruct.Sum = CheckSum((uint8_t *)&Pro_D2WConfigCmdStruct, sizeof(Pro_D2WConfigCmdStruct));
-//		Pro_UART_SendBuf((uint8_t *)&Pro_D2WConfigCmdStruct,sizeof(Pro_D2WConfigCmdStruct), 0);	
-					LED_RGB_Control(0,0,100);
+		Device_WirteStruct.LED_R = 0;
+		Device_WirteStruct.LED_G = 0;
+		Device_WirteStruct.LED_B = 50;
+		LED_RGB_Control(Device_WirteStruct.LED_R,Device_WirteStruct.LED_G,Device_WirteStruct.LED_B);		
+		
+		Pro_D2WConfigCmdStruct.Pro_HeadPart.SN = SN++;
+		Pro_D2WConfigCmdStruct.Config_Method = 0x02;
+		Pro_D2WConfigCmdStruct.Sum = CheckSum((uint8_t *)&Pro_D2WConfigCmdStruct, sizeof(Pro_D2WConfigCmdStruct));
+		Pro_UART_SendBuf((uint8_t *)&Pro_D2WConfigCmdStruct,sizeof(Pro_D2WConfigCmdStruct), 0);	
 
 	}
 	

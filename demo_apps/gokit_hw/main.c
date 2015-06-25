@@ -44,6 +44,7 @@
 #include "gokit_hal/protocol.h"
 #include "gokit_hal/delay.h"
 #include "gokit_hal/hal_temp_hum.h"
+#include "gokit_hal/hal_infrared.h"
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
 ////////////////////////////////////////////////////////////////////////////////
@@ -55,6 +56,24 @@
 //#define GOKIT_UART_BAUD  9600U
 //#define GOKIT_UART_INSTANCE 3U
 
+UART_HandleTypeDef         				UART_HandleStruct;
+Pro_Wait_AckTypeDef           	  Wait_AckStruct;
+Device_WirteTypeDef   					  Device_WirteStruct;    		
+Device_ReadTypeDef                Device_ReadStruct; 
+
+Pro_M2W_ReturnInfoTypeDef  				Pro_M2W_ReturnInfoStruct;
+Pro_CommonCmdTypeDef      			 	Pro_CommonCmdStruct;
+Pro_W2D_WifiStatusTypeDef     	 	Pro_W2D_WifiStatusStruct;     
+Pro_CommonCmdTypeDef     	 				Pro_M2WResetCmdStruct;    		
+Pro_D2W_ConfigWifiTypeDef       	Pro_D2WConfigCmdStruct;   		
+Pro_D2W_ReportDevStatusTypeDef   	Pro_D2W_ReportStatusStruct;
+KEY_StatusTypeDef 								KEY_Status;
+uint8_t									 					SN;    
+
+uint32_t SystemTimeCount = 0;
+uint32_t ReportTimeCount = 0;
+
+uint8_t Set_LedStatus = 0;
 
 void PIT0_CH0_Init()
 {
@@ -79,43 +98,111 @@ void gokit_hal_init()
 	Motor_Init();
 	UARTx_Init();
 	Delay_Init(120);	//120MHZ
+	DHT11_Init();
+	IR_Init();
 }
+void McuStatusInit(void)
+{
+	PRINTF("UART_HandleStruct Init...\r\n");
+	memset(&UART_HandleStruct, 0, sizeof(UART_HandleStruct));
+	memset(&Pro_CommonCmdStruct, 0, sizeof(Pro_CommonCmdStruct));
+	Pro_CommonCmdStruct.Pro_HeadPart.Head[0] = 0XFF;
+	Pro_CommonCmdStruct.Pro_HeadPart.Head[1] = 0XFF;	
+	
+	PRINTF("Pro_CommonCmdStruct Init...\r\n");
+	memset(&Pro_CommonCmdStruct, 0, sizeof(Pro_CommonCmdStruct));
+	Pro_CommonCmdStruct.Pro_HeadPart.Head[0] = 0XFF;
+	Pro_CommonCmdStruct.Pro_HeadPart.Head[1] = 0XFF;	
+	
+	
+	memset(&Pro_M2W_ReturnInfoStruct, 0, sizeof(Pro_M2W_ReturnInfoStruct));
+	Pro_M2W_ReturnInfoStruct.Pro_HeadPart.Head[0] = 0XFF; 
+	Pro_M2W_ReturnInfoStruct.Pro_HeadPart.Head[1] = 0XFF;
+	Pro_M2W_ReturnInfoStruct.Pro_HeadPart.Len = exchangeBytes(sizeof(Pro_M2W_ReturnInfoStruct) - 4);
+	Pro_M2W_ReturnInfoStruct.Pro_HeadPart.Cmd = Pro_D2W__GetDeviceInfo_Ack_Cmd;
+	memcpy(Pro_M2W_ReturnInfoStruct.Pro_ver, PRO_VER, strlen(PRO_VER));
+	memcpy(Pro_M2W_ReturnInfoStruct.P0_ver, P0_VER, strlen(P0_VER));
+	memcpy(Pro_M2W_ReturnInfoStruct.Hard_ver, HARD_VER, strlen(HARD_VER));
+	memcpy(Pro_M2W_ReturnInfoStruct.Soft_ver, SOFT_VER, strlen(SOFT_VER));
+	memcpy(Pro_M2W_ReturnInfoStruct.Product_Key, PRODUCT_KEY, strlen(PRODUCT_KEY));
+	Pro_M2W_ReturnInfoStruct.Binable_Time = exchangeBytes(0);;		
+	
+	PRINTF("Pro_D2W_ReportStatusStruct Init...\r\n");
+	memset(&Pro_D2W_ReportStatusStruct, 0, sizeof(Pro_D2W_ReportStatusStruct));
+	Pro_D2W_ReportStatusStruct.Pro_HeadPartP0Cmd.Pro_HeadPart.Head[0] = 0XFF;
+	Pro_D2W_ReportStatusStruct.Pro_HeadPartP0Cmd.Pro_HeadPart.Head[1] = 0XFF;            
+	Pro_D2W_ReportStatusStruct.Pro_HeadPartP0Cmd.Pro_HeadPart.Len = exchangeBytes(sizeof(Pro_D2W_ReportStatusStruct) - 4);
+	Pro_D2W_ReportStatusStruct.Pro_HeadPartP0Cmd.Pro_HeadPart.Cmd = Pro_D2W_P0_Cmd;
+	
+	PRINTF("Pro_M2WResetCmdStruct Init...\r\n");
+	memset(&Pro_M2WResetCmdStruct, 0, sizeof(Pro_M2WResetCmdStruct));
+	Pro_M2WResetCmdStruct.Pro_HeadPart.Head[0] = 0XFF;
+	Pro_M2WResetCmdStruct.Pro_HeadPart.Head[1] = 0XFF;
+	Pro_M2WResetCmdStruct.Pro_HeadPart.Len = exchangeBytes(sizeof(Pro_M2WResetCmdStruct) - 4);
+	Pro_M2WResetCmdStruct.Pro_HeadPart.Cmd = Pro_D2W_ResetWifi_Cmd;
+	
+	PRINTF("Pro_D2WConfigCmdStruct Init...\r\n");
+	memset(&Pro_D2WConfigCmdStruct, 0, sizeof(Pro_D2WConfigCmdStruct));
+	Pro_D2WConfigCmdStruct.Pro_HeadPart.Head[0] = 0XFF;
+	Pro_D2WConfigCmdStruct.Pro_HeadPart.Head[1] = 0XFF;
+	Pro_D2WConfigCmdStruct.Pro_HeadPart.Len = exchangeBytes(sizeof(Pro_D2WConfigCmdStruct) - 4);
+	Pro_D2WConfigCmdStruct.Pro_HeadPart.Cmd = Pro_D2W_ControlWifi_Config_Cmd;	
+
+	PRINTF("Device_WirteStruct Init...\r\n");
+	memset(&Device_WirteStruct, 0, sizeof(Device_WirteStruct));
+	Device_WirteStruct.Motor = exchangeBytes(0x05);   //¹Ø±Õµç»ú
+	
+	PRINTF("Device_ReadStruct Init...\r\n");
+	memset(&Device_ReadStruct, 0, sizeof(Device_ReadStruct));
+	
+	PRINTF("KEY_Status Init...\r\n");
+	memset(&KEY_Status, 0, sizeof(KEY_Status));
+	
+}
+void PRINTF_DevStatus(void)
+{
+	//PRINTF_TimeDisplay();
+	
+	PRINTF("RGB LED R=%d,G=%d,B=%d; Motor=%d; Humidity=%d,Temperature=%d; Infrared=%d\r\n",
+	Pro_D2W_ReportStatusStruct.Device_All.Device_Wirte.LED_R,Pro_D2W_ReportStatusStruct.Device_All.Device_Wirte.LED_G,Pro_D2W_ReportStatusStruct.Device_All.Device_Wirte.LED_B,
+	exchangeBytes(Pro_D2W_ReportStatusStruct.Device_All.Device_Wirte.Motor),
+	Pro_D2W_ReportStatusStruct.Device_All.Device_Read.Humidity,
+	Pro_D2W_ReportStatusStruct.Device_All.Device_Read.Temperature,
+	Pro_D2W_ReportStatusStruct.Device_All.Device_Read.Infrared);
+	PRINTF("------------------------------ReportDevStatus-------------------------------------\r\n");
+}
+void ReportDevStatusHandle(void)
+{
+	uint8_t Device_Status = 0;
+	if(ReportTimeCount >= 3000)
+	{
+		ReportTimeCount = 0;
+		Device_Status = memcmp(&Device_ReadStruct,&Pro_D2W_ReportStatusStruct.Device_All.Device_Read, sizeof(Device_ReadStruct));
+		if(Device_Status)
+		{
+			Pro_D2W_ReportDevStatusHandle();
+		}	
+	}
+}
+
+
 int main (void)
 {
-    // RX buffers
-    //! @param receiveBuff Buffer used to hold received data
-    // Initialize standard SDK demo application pins
     hardware_init();
-		//LED1_EN;
-		
+		//LED1_EN;		
 		gokit_hal_init();
+		McuStatusInit();
     // Initialize LED1
 		
-    // Print the initial banner
-	  PRINTF("\r\nHello World!clock:%d\n\n\r",SystemCoreClock);
+	//	UARTx_test();//while(1) ,test uart3
 
-	
-		UARTx_test();//while(1) ,test uart3
-		int i=0,j=0;
     while(1)
     {
-			
-			// Main routine that simply echoes received characters forever
-				uint8_t temp,hum=0;
-			DHT11_Read_Data(&temp,&hum);
-		PRINTF("Temp and hum %d %d\r\n",temp,hum);
-			for(j=0;j<5;j++)
-						Delay_us(100000);
-			//Delay_ms(200);	
-//			for(j=0;j<10;j++)
-
-			PRINTF("\r\n500ms....%d\r\n",++i);
-	//		PRINTF("\r\n500ms....\r\n");
-        // First, get character
-       // receiveBuff = GETCHAR();
-			KEY_Handle();					
-        // Now echo the received character
-       // PUTCHAR(receiveBuff);
+		MessageHandle();
+		KEY_Handle();		
+		IR_Handle();
+		DHT11_Read_Data(&Device_ReadStruct.Temperature, &Device_ReadStruct.Humidity);
+		ReportDevStatusHandle();
     }
 }
 
