@@ -1,15 +1,15 @@
 #include "delay.h"
 #include "fsl_debug_console.h"
 
-static uint8_t  fac_us=0;																		//usÑÓÊ±±¶³ËÊý
-static uint32_t fac_ms=0;																		//msÑÓÊ±±¶³ËÊý
+static uint8_t  fac_us=0;																		//uså»¶æ—¶å€ä¹˜æ•°
+static uint32_t fac_ms=0;																		//mså»¶æ—¶å€ä¹˜æ•°
 
 void Delay_Init(uint8_t SYSCLK)
 {
-	//SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);	//Ñ¡ÔñÍâ²¿Ê±ÖÓ  HCLK/8
+	//SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);	//é€‰æ‹©å¤–éƒ¨æ—¶é’Ÿ  HCLK/8
 	SysTick->CTRL = ((SysTick->CTRL & ~SysTick_CTRL_CLKSOURCE_Msk)
                                      | 1<< SysTick_CTRL_CLKSOURCE_Pos);
-	fac_us=SYSCLK; //Ó²¼þ1·ÖÆµ,fac_usµÃ³öµÄÖµÊÇÒª¸øÏÂÃæµÄÊ±ÖÓº¯ÊýÓÃµÄ  
+	fac_us=SYSCLK; //ç¡¬ä»¶1åˆ†é¢‘,fac_uså¾—å‡ºçš„å€¼æ˜¯è¦ç»™ä¸‹é¢çš„æ—¶é’Ÿå‡½æ•°ç”¨çš„  
 	fac_ms =fac_us*1000; 	
 }	
 
@@ -17,28 +17,28 @@ void Delay_Init(uint8_t SYSCLK)
 int Delay_us(uint32_t nus)
 {		
 		uint32_t temp;  
-		temp = nus*fac_us;  //ÑÓÊ±10usµÄ»°¾ÍÊÇ  10*120=120,×°µ½load¼Ä´æÆ÷ÖÐ 
-		if(temp > 0xFFFFFF)	//SysTickÊÇ24Î»µÄ¼ÆÊýÆ÷£¬¼ì²éÊÇ·ñÔ½½ç¡£max us 139810us
+		temp = nus*fac_us-1;  //å»¶æ—¶10usçš„è¯å°±æ˜¯  10*120=120,è£…åˆ°loadå¯„å­˜å™¨ä¸­ 
+		if(temp > 0xFFFFFF)	//SysTickæ˜¯24ä½çš„è®¡æ•°å™¨ï¼Œæ£€æŸ¥æ˜¯å¦è¶Šç•Œã€‚max us 139810us
 			return -1;
 		SysTick->LOAD = temp;
-		SysTick->VAL=0U;//¼ÆÊýÆ÷Çå0,ÒòÎªcurrrent×Ö¶Î±»ÊÖ¶¯ÇåÁãÊ±,load½«×Ô¶¯ÖØ×°µ½VALÖÐ  
+		SysTick->VAL=0U;//è®¡æ•°å™¨æ¸…0,å› ä¸ºcurrrentå­—æ®µè¢«æ‰‹åŠ¨æ¸…é›¶æ—¶,loadå°†è‡ªåŠ¨é‡è£…åˆ°VALä¸­  
 		SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk |SysTick_CTRL_CLKSOURCE_Msk;
 		//SysTick->CTRL = 0x5U;
  
-		while(!(SysTick->CTRL &(1<<16))); //²éÑ¯  	
-		SysTick->CTRL = 0x4U;  //¹Ø±Õ¼ÆÊýÆ÷  
-		SysTick->VAL = 0U;   //Çå¿Õval      																//Çå¿Õ¼ÆÊýÆ÷	 
+		while(!(SysTick->CTRL &(1<<16))); //æŸ¥è¯¢  	
+		SysTick->CTRL = 0x4U;  //å…³é—­è®¡æ•°å™¨  
+		SysTick->VAL = 0U;   //æ¸…ç©ºval      																//æ¸…ç©ºè®¡æ•°å™¨	 
 		return 0;
 }
 
 
 void Delay_ms(uint16_t nms)		//max delay ms = 139
 {	 		  	  
-		SysTick->LOAD =nms*fac_ms;
-		SysTick->VAL=0U;//¼ÆÊýÆ÷Çå0,ÒòÎªcurrrent×Ö¶Î±»ÊÖ¶¯ÇåÁãÊ±,load½«×Ô¶¯ÖØ×°µ½VALÖÐ  
+		SysTick->LOAD =nms*fac_ms-1;
+		SysTick->VAL=0U;//è®¡æ•°å™¨æ¸…0,å› ä¸ºcurrrentå­—æ®µè¢«æ‰‹åŠ¨æ¸…é›¶æ—¶,loadå°†è‡ªåŠ¨é‡è£…åˆ°VALä¸­  
 		SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk |SysTick_CTRL_CLKSOURCE_Msk;
 	
-		while(!(SysTick->CTRL &(1<<16))); //²éÑ¯  	
-		SysTick->CTRL = 0x4U;  //¹Ø±Õ¼ÆÊýÆ÷  
-		SysTick->VAL = 0U;   //Çå¿Õval      																//Çå¿Õ¼ÆÊýÆ÷	 
+		while(!(SysTick->CTRL &(1<<16))); //æŸ¥è¯¢  	
+		SysTick->CTRL = 0x4U;  //å…³é—­è®¡æ•°å™¨  
+		SysTick->VAL = 0U;   //æ¸…ç©ºval      																//æ¸…ç©ºè®¡æ•°å™¨	 
 } 
