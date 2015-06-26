@@ -35,8 +35,8 @@
 	* @email 	 guo8113@126.com
   * @version V1.0
   * @date    15/06/2015
-  * @brief   1，专业嵌入式智能设备方案定制
-						 2，承接Freescale,NXP,ST Cortex M项目,TI DM816x项目
+  * @brief   1锛屼笓涓氬祵鍏ュ紡鏅鸿兘璁惧鏂规瀹氬埗
+						 2锛屾壙鎺reescale,NXP,ST Cortex M椤圭洰,TI DM816x椤圭洰
   ******************************************************************************
   * @copy
   *
@@ -52,15 +52,13 @@
 /******************************************************************************
  * Code
  *****************************************************************************/
-/******************************************************************************/
-/*             KEY1 :长按  RESET WIFI, KEY2 :短按  配置WiFi联                 */
-/*             定时器3中断服务程序                                            */
-/******************************************************************************/
-extern Pro_Wait_AckTypeDef           	  Wait_AckStruct;
-extern uint32_t                         SystemTimeCount ;
-extern uint8_t 													KeyCountTime;
-extern UART_HandleTypeDef  							UART_HandleStruct;
+
+extern UART_HandleTypeDef  		UART_HandleStruct;
 extern Device_ReadTypeDef               Device_ReadStruct;
+extern uint32_t 		        ReportTimeCount;
+extern Pro_Wait_AckTypeDef              Wait_AckStruct;
+extern uint32_t                         SystemTimeCount ;
+extern uint8_t 				KeyCountTime;
 
 extern void UART_DRV_IRQHandler(uint32_t instance);
 //extern uint32_t ReportTimeCount;
