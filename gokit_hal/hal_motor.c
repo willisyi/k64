@@ -6,8 +6,8 @@
 	* @email 	 guo8113@126.com
   * @version V1.0
   * @date    15/06/2015
-  * @brief   1，专业嵌入式智能设备方案定制
-						 2，承接Freescale,NXP,ST Cortex M项目
+  * @brief   1锛屼笓涓氬祵鍏ュ紡鏅鸿兘璁惧鏂规瀹氬埗
+						 2锛屾壙鎺reescale,NXP,ST Cortex M椤圭洰
   ******************************************************************************
   * @copy
   *
@@ -64,7 +64,7 @@ void Motor_status(uint16_t status)
 	else if (status > 5)
 	{
 		GPIO_DRV_ClearPinOutput(kMot1);
-		FTM_PWM_Set_Start( (status-5)*10 );	//only 40% strength used.
+		FTM_PWM_Set_Start( (10-status)*10 );	//only 40% strength used.
 	}
 	else if (status < 5)
 	{
