@@ -57,18 +57,18 @@ void Motor_status(uint16_t status)
 {		
 	if(status == 5)
 	{
-		GPIO_DRV_ClearPinOutput(kMot1);
+		GPIO_DRV_SetPinOutput(kMot1);
 		//GPIO_DRV_ClearPinOutput(kMot2);
 		FTM_PWM_Set_Start(0);
 	}
 	else if (status > 5)
 	{
-		GPIO_DRV_ClearPinOutput(kMot1);
-		FTM_PWM_Set_Start( (10-status)*10 );	//only 40% strength used.
+		GPIO_DRV_SetPinOutput(kMot1);
+		FTM_PWM_Set_Start( (status-5)*10 );	//only 40% strength used.
 	}
 	else if (status < 5)
 	{
-		GPIO_DRV_SetPinOutput(kMot1);
+		GPIO_DRV_ClearPinOutput(kMot1);
 		FTM_PWM_Set_Start( status*10 );
 	}
 

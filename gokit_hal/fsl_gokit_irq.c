@@ -49,19 +49,19 @@
 #include "fsl_gpio_driver.h"
 #include "protocol.h"
 #include "hal_infrared.h"
+#include "fsl_debug_console.h"
 /******************************************************************************
  * Code
  *****************************************************************************/
 
-extern UART_HandleTypeDef  		UART_HandleStruct;
+extern UART_HandleTypeDef  		          UART_HandleStruct;
 extern Device_ReadTypeDef               Device_ReadStruct;
-extern uint32_t 		        ReportTimeCount;
+extern uint32_t 		                    ReportTimeCount;
 extern Pro_Wait_AckTypeDef              Wait_AckStruct;
 extern uint32_t                         SystemTimeCount ;
-extern uint8_t 				KeyCountTime;
+extern uint8_t 													KeyCountTime;
 
 extern void UART_DRV_IRQHandler(uint32_t instance);
-//extern uint32_t ReportTimeCount;
 /*!
  * @brief System default IRQ handler defined in startup code.
  */
@@ -89,7 +89,10 @@ void PIT0_IRQHandler(void)
 {
     /* Clear interrupt flag.*/
     PIT_HAL_ClearIntFlag(g_pitBase[0], 0U);
-    KeyCountTime++;
+    SystemTimeCount++;
+		Wait_AckStruct.SendTime ++;
+		KeyCountTime++;
+		ReportTimeCount++;
 }
 #endif
 
@@ -112,10 +115,11 @@ void UART3_RX_TX_IRQHandler(void)
     UART_DRV_IRQHandler(3);
 }
 
-
+/*//当使用中断方式时，会导致Uart_send 特别慢。
 void PORTB_IRQHandler()
 {
 	GPIO_DRV_ClearPinIntFlag(kInfPin);
+	PRINTF("Infrared_EXTI...\r\n");
 	
 	  if(GPIO_DRV_ReadPinInput(kInfPin))
 		{
@@ -127,7 +131,7 @@ void PORTB_IRQHandler()
 		}	
 		Pro_D2W_ReportDevStatusHandle();
 }
-
+*/
 
 
 /*******************************************************************************

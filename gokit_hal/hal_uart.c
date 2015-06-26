@@ -36,7 +36,7 @@ extern UART_HandleTypeDef  		UART_HandleStruct;
 
 static uart_state_t uartState;
 int cnt=0;
-//uint8_t Buff[256];
+uint8_t Buff[256];
 void UART2_Send_DATA(uint8_t data);
 
 /* Pointer to uart runtime state structure */
@@ -115,7 +115,12 @@ void UARTx_Init(void)
 		OSA_Init();
 		UART_DRV_Init(GOKIT_UART_INSTANCE, &uartState, &uartConfig);
 		/*Then you can register callback func.*/
-		
+		UART_DRV_InstallRxCallback(GOKIT_UART_INSTANCE,
+                                              uart_rx_callback,
+                                              Buff,
+                                              &uartState,
+                                              true);
+
 		//UART_DRV_SendDataBlocking(UART_INSTANCE, buffStart, byteCountBuff, timeout);
 }
 void UARTx_test(void)

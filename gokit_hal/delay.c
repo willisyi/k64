@@ -32,12 +32,13 @@ int Delay_us(uint32_t nus)
 }
 
 
+
 void Delay_ms(uint16_t nms)		//max delay ms = 139
 {	 		  	  
 		SysTick->LOAD =nms*fac_ms-1;
 		SysTick->VAL=0U;//计数器清0,因为currrent字段被手动清零时,load将自动重装到VAL中  
-		SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk |SysTick_CTRL_CLKSOURCE_Msk;
-	
+		//SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk |SysTick_CTRL_CLKSOURCE_Msk;
+		SysTick->CTRL = 0x5U;
 		while(!(SysTick->CTRL &(1<<16))); //查询  	
 		SysTick->CTRL = 0x4U;  //关闭计数器  
 		SysTick->VAL = 0U;   //清空val      																//清空计数器	 

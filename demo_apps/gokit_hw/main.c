@@ -189,20 +189,19 @@ void ReportDevStatusHandle(void)
 int main (void)
 {
     hardware_init();
-		//LED1_EN;		
+		//LED1_EN;	//k64 onboard rgb led	
 		gokit_hal_init();
 		McuStatusInit();
-    // Initialize LED1
 		
-	//	UARTx_test();//while(1) ,test uart3
+		//	UARTx_test();//while(1) ,test uart3
 
     while(1)
     {
-		MessageHandle();
-		KEY_Handle();		
-		IR_Handle();
-		DHT11_Read_Data(&Device_ReadStruct.Temperature, &Device_ReadStruct.Humidity);
-		ReportDevStatusHandle();
+		  MessageHandle();
+		  KEY_Handle();		
+		  IR_Handle();
+		  DHT11_Read_Data(&Device_ReadStruct.Temperature, &Device_ReadStruct.Humidity);
+		  ReportDevStatusHandle();
     }
 }
 
